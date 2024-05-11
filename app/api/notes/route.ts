@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
     try {
         await connectMongo();
-        const body: CreateNoteDto = await req.json();
+        const body: CreateNoteDto = await req.json(); 
         if (body.title && body.content) {
             const note = await Note.create(body);
             return NextResponse.json(
@@ -20,10 +20,13 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: error }, { status: HttpStatusCode.BadRequest });
     }
 }
-export async function GET() {
+
+export async function GET(req: NextRequest) {
+    const contentSearch = req.nextUrl.searchParams.get('content');
     try {
         await connectMongo();
-        const notes = await Note.find();
+        const query = contentSearch ? { content: { $regex: contentSearch, $options: 'i' } } : {};
+        const notes = await Note.find(query);
         return NextResponse.json({ data: notes });
     } catch (error) {
         return NextResponse.json({ error });

@@ -18,12 +18,8 @@ const NotesList = () => {
     const fetchNotes = async () => {
       try {
         const response = await axios.get<INote[]>("/api/notes");
-        const fetchedNotes: NoteComponentModel[] = response.data.map((rawNote: INote) => ({
-          note: {
-            ...rawNote,
-            createdAt: rawNote.createdAt ? new Date(rawNote.createdAt) : undefined,
-            updatedAt: rawNote.updatedAt ? new Date(rawNote.updatedAt) : undefined,
-          },
+        const fetchedNotes: NoteComponentModel[] = response.data.map((note: INote) => ({
+          note,
           editMode: false,
         }));
         setNotes(fetchedNotes);
@@ -39,7 +35,12 @@ const NotesList = () => {
 
   const handleSave = async (note: INote) => {
     try {
-      const response = await axios.post("/api/notes", note);
+      let response;
+      if (note.id) {
+        response = await axios.post(`/api/notes/${note.id}`, note);
+      } else {
+        response = await axios.post("/api/notes", note);
+      }
       const savedNote = response.data.note;
       setNotes((prevNotes) => {
         const existingNoteIndex = prevNotes.findIndex((n) => n.note.id === savedNote.id);
@@ -58,6 +59,15 @@ const NotesList = () => {
     }
   };
 
+  const handleDelete = async (note: INote) => {
+    try {
+      await axios.delete(`/api/notes/${note.id}`);
+      setNotes((prevNotes) => prevNotes.filter((n) => n.note.id !== note.id));
+    } catch (error) {
+      console.error("Failed to delete note:", error);
+    }
+  };
+
   const addNewNote = () => {
     const newNoteModel: NoteComponentModel = { note: { title: "", content: "" }, editMode: true };
     setNotes([...notes, newNoteModel]);
@@ -68,7 +78,7 @@ const NotesList = () => {
       {loading ? (
         <p>Loading notes...</p>
       ) : (
-        notes.map((noteModel, index) => <NoteComponent key={index} note={noteModel.note} editMode={noteModel.editMode} onSave={handleSave} />)
+        notes.map((noteModel, index) => <NoteComponent key={index} note={noteModel.note} editMode={noteModel.editMode} onSave={handleSave} onDelete={handleDelete} />)
       )}
       <button className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" onClick={addNewNote}>
         Add New Note

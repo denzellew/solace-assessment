@@ -17,9 +17,13 @@ const NotesList = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await axios.get("/api/notes");
-        const fetchedNotes: NoteComponentModel[] = response.data.data.map((note: INote) => ({
-          note,
+        const response = await axios.get<INote[]>("/api/notes");
+        const fetchedNotes: NoteComponentModel[] = response.data.map((rawNote: INote) => ({
+          note: {
+            ...rawNote,
+            createdAt: rawNote.createdAt ? new Date(rawNote.createdAt) : undefined,
+            updatedAt: rawNote.updatedAt ? new Date(rawNote.updatedAt) : undefined,
+          },
           editMode: false,
         }));
         setNotes(fetchedNotes);

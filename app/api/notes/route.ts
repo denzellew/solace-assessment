@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
         await connectMongo();
         const query = contentSearch ? { content: { $regex: contentSearch, $options: 'i' } } : {};
         const notes = await Note.find(query);
-        return NextResponse.json({ data: notes });
+        return NextResponse.json(notes);
     } catch (error) {
         return NextResponse.json({ error });
     }

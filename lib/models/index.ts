@@ -22,12 +22,7 @@ NoteSchema.virtual('id').get(function() {
 
 // Ensure virtual fields are serialized
 NoteSchema.set('toJSON', {
-  virtuals: true,
-  transform: (doc: any, ret) => {
-    ret.createdAt = new Date(doc.createdAt);
-    ret.updatedAt = new Date(doc.updatedAt);
-    return ret;
-  }
+  virtuals: true
 });
 
 const Note = models.Note || model('Note', NoteSchema, 'notes');

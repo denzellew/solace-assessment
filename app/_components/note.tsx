@@ -43,13 +43,13 @@ const NoteEdit = ({ note, onChange, onSave }: { note: INote; onChange: (note: IN
 );
 
 interface NoteComponentProps {
-  note?: INote;
+  note: INote;
   editMode?: boolean;
   onSave: (note: INote) => void;
 }
 
 export const NoteComponent = ({ note: initialNote, editMode: initialEditMode, onSave }: NoteComponentProps) => {
-  const [note, setNote] = useState<INote>(initialNote || { title: "", content: "", createdAt: "", updatedAt: "" });
+  const [note, setNote] = useState<INote>(initialNote);
   const [editMode, setEditMode] = useState(initialEditMode || false);
 
   const handleSave = useCallback(() => {

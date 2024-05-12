@@ -43,16 +43,18 @@ const NotesList = () => {
       }
       const savedNote = response.data.note;
       setNotes((prevNotes) => {
-        const existingNoteIndex = prevNotes.findIndex((n) => n.note.id === savedNote.id);
-        if (existingNoteIndex !== -1) {
-          // Update existing note
-          const updatedNotes = [...prevNotes];
-          updatedNotes[existingNoteIndex] = { note: savedNote, editMode: false };
-          return updatedNotes;
-        } else {
-          // Add new note
-          return [...prevNotes, { note: savedNote, editMode: false }];
+        const updatedNotes = [...prevNotes];
+        let existingNoteIndex = prevNotes.findIndex((n) => n.note.id === savedNote.id);
+        if (existingNoteIndex === -1) {
+          // Find matching existing note by title and content
+          existingNoteIndex = prevNotes.findIndex((n) => !n.note.id && n.note.title === savedNote.title && n.note.content === savedNote.content);
         }
+
+        // Update ex˝isting note
+        if (existingNoteIndex !== -1) {
+          updatedNotes[existingNoteIndex] = { note: savedNote, editMode: false };
+        }
+        return updatedNotes;
       });
     } catch (error) {
       console.error("Failed to save note:", error);
@@ -78,7 +80,9 @@ const NotesList = () => {
       {loading ? (
         <p>Loading notes...</p>
       ) : (
-        notes.map((noteModel, index) => <NoteComponent key={index} note={noteModel.note} editMode={noteModel.editMode} onSave={handleSave} onDelete={handleDelete} />)
+        notes.map((noteModel, index) => (
+          <NoteComponent key={index} note={noteModel.note} editMode={noteModel.editMode} onSave={handleSave} onDelete={handleDelete} />
+        ))
       )}
       <button className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" onClick={addNewNote}>
         Add New Note

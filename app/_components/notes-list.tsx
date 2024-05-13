@@ -26,7 +26,7 @@ const NotesList = () => {
 
   return (
     <div>
-       <div className="search-bar">
+      <div className="search-bar">
         <input
           type="text"
           value={searchText}
@@ -42,11 +42,19 @@ const NotesList = () => {
       {loading ? (
         <p>Loading notes...</p>
       ) : (
-        notes.map((noteModel, index) => (
-          <NoteComponent key={index} note={noteModel.note} editMode={noteModel.editMode} onSave={handleEditNote} onDelete={handleDelete} />
-        ))
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {notes.map((noteModel, index) => (
+            <div className="bg-white shadow-md rounded-lg p-4 mb-4" style={{ maxWidth: '300px' }} key={index}>
+              <NoteComponent note={noteModel.note} editMode={noteModel.editMode} onSave={handleEditNote} onDelete={handleDelete} />
+            </div>
+          ))}
+        </div>
       )}
-      {addNote && <NoteComponent editMode={true} onSave={handleSaveNewNote} onCancel={cancelNewNote} /> }
+      {addNote && (
+        <div className="bg-white shadow-md rounded-lg p-4 mb-4" style={{ maxWidth: '300px' }}>
+          <NoteComponent editMode={true} onSave={handleSaveNewNote} onCancel={cancelNewNote} />
+        </div>
+      )}
       <button className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" onClick={addNewNote}>
         Add New Note
       </button>

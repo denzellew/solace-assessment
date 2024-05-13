@@ -38,7 +38,7 @@ export const NoteComponent = ({ note: initialNote, editMode: initialEditMode, on
   }, [note, onDelete]);
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
+    <div className="p-4 max-w-xl mx-auto h-full">
       {editMode ? <NoteEdit note={note} onChange={setNote} onSave={handleSave} onCancel={handleCancel} /> : <NoteDisplay note={note} onEdit={() => setEditMode(true)} onDelete={handleDelete} />}
     </div>
   );

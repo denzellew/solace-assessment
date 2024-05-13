@@ -4,76 +4,11 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { NoteComponent } from "./note";
 import { INote } from "@/lib/models";
+import useNotes from "../_hooks/use-notes";
 
-interface NoteComponentModel {
-  note: INote;
-  editMode: boolean;
-}
 
 const NotesList = () => {
-  const [notes, setNotes] = useState<NoteComponentModel[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchNotes = async () => {
-      try {
-        const response = await axios.get<INote[]>("/api/notes");
-        const fetchedNotes: NoteComponentModel[] = response.data.map((note: INote) => ({
-          note,
-          editMode: false,
-        }));
-        setNotes(fetchedNotes);
-      } catch (error) {
-        console.error("Failed to fetch notes:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNotes();
-  }, []);
-
-  const handleSave = async (note: INote) => {
-    try {
-      let response;
-      if (note.id) {
-        response = await axios.post(`/api/notes/${note.id}`, note);
-      } else {
-        response = await axios.post("/api/notes", note);
-      }
-      const savedNote = response.data.note;
-      setNotes((prevNotes) => {
-        const updatedNotes = [...prevNotes];
-        let existingNoteIndex = prevNotes.findIndex((n) => n.note.id === savedNote.id);
-        if (existingNoteIndex === -1) {
-          // Find matching existing note by title and content
-          existingNoteIndex = prevNotes.findIndex((n) => !n.note.id && n.note.title === savedNote.title && n.note.content === savedNote.content);
-        }
-
-        // Update ex˝isting note
-        if (existingNoteIndex !== -1) {
-          updatedNotes[existingNoteIndex] = { note: savedNote, editMode: false };
-        }
-        return updatedNotes;
-      });
-    } catch (error) {
-      console.error("Failed to save note:", error);
-    }
-  };
-
-  const handleDelete = async (note: INote) => {
-    try {
-      await axios.delete(`/api/notes/${note.id}`);
-      setNotes((prevNotes) => prevNotes.filter((n) => n.note.id !== note.id));
-    } catch (error) {
-      console.error("Failed to delete note:", error);
-    }
-  };
-
-  const addNewNote = () => {
-    const newNoteModel: NoteComponentModel = { note: { title: "", content: "" }, editMode: true };
-    setNotes([...notes, newNoteModel]);
-  };
+  const { notes, addNote, loading, handleSaveNewNote, handleEditNote, handleDelete, addNewNote, cancelNewNote } = useNotes();
 
   return (
     <div>
@@ -81,9 +16,10 @@ const NotesList = () => {
         <p>Loading notes...</p>
       ) : (
         notes.map((noteModel, index) => (
-          <NoteComponent key={index} note={noteModel.note} editMode={noteModel.editMode} onSave={handleSave} onDelete={handleDelete} />
+          <NoteComponent key={index} note={noteModel.note} editMode={noteModel.editMode} onSave={handleEditNote} onDelete={handleDelete} />
         ))
       )}
+      {addNote && <NoteComponent editMode={true} onSave={handleSaveNewNote} onCancel={cancelNewNote} /> }
       <button className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" onClick={addNewNote}>
         Add New Note
       </button>

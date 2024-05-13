@@ -11,11 +11,13 @@ export default function useNotes() {
   const [notes, setNotes] = useState<NoteComponentModel[]>([]);
   const [addNote, setAddNote] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(''); // Added state for search term
 
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await axios.get<INote[]>("/api/notes");
+        setLoading(true);
+        const response = await axios.get<INote[]>(`/api/notes?content=${searchTerm}`); // Modified to include searchTerm
         const fetchedNotes: NoteComponentModel[] = response.data.map((note: INote) => ({
           note,
           editMode: false,
@@ -29,7 +31,11 @@ export default function useNotes() {
     };
 
     fetchNotes();
-  }, []);
+  }, [searchTerm]); // Added searchTerm as a dependency
+
+  const updateSearchTerm = (newTerm: string) => { // Method to update searchTerm
+    setSearchTerm(newTerm);
+  };
 
   const handleSaveNewNote = async (note: INote) => {
     try {
@@ -78,5 +84,5 @@ export default function useNotes() {
     setAddNote(false);
   }
 
-  return { notes, addNote, loading, handleSaveNewNote, handleEditNote, handleDelete, addNewNote, cancelNewNote };
+  return { notes, addNote, loading, handleSaveNewNote, handleEditNote, handleDelete, addNewNote, cancelNewNote, updateSearchTerm }; // Expose updateSearchTerm
 }
